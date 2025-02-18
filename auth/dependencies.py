@@ -7,19 +7,16 @@ from database.session import get_db
 from models.user import User
 from crud.user import is_token_blacklisted
 from fastapi_limiter import FastAPILimiter
-from fastapi_limiter.depends import RateLimiter
 import redis
 from fastapi import FastAPI
 
 app = FastAPI()
 
-# Подключаем Redis для хранения лимитов
 redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
 @app.on_event("startup")
 async def startup():
     await FastAPILimiter.init(redis_client)
-
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
