@@ -9,8 +9,11 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
+    gender = Column(Boolean, nullable=False)
     is_active = Column(Boolean, default=True)
-    role = Column(String, default="user")  # user | admin
+    role = Column(String, default="user")
 
 class BlacklistedToken(Base):
     __tablename__ = "blacklisted_tokens"
