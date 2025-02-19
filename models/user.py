@@ -17,8 +17,9 @@ class User(Base):
     weight = Column(Float, nullable=True)
     height = Column(Float, nullable=True)
     age = Column(Integer, nullable=True)
-    fitness_goal = Column(String, nullable=True)
-
+    training_program = Column(String, nullable=True)
+    training_location = Column(String, nullable=True)
+    training_experience = Column(String, nullable=True)
 
 class BlacklistedToken(Base):
     __tablename__ = "blacklisted_tokens"
