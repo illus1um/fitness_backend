@@ -24,6 +24,11 @@ class UserOut(BaseModel):
     class Config:
         orm_mode = True
 
+class UserUpdate(BaseModel):
+    weight: float
+    height: float
+    age: int
+
 class UserLogin(BaseModel):
     username: str
     password: str

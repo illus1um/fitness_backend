@@ -3,7 +3,6 @@ from models.user import User
 from auth.hashing import get_password_hash
 from auth.hashing import verify_password
 from models.user import BlacklistedToken
-from datetime import timedelta
 import datetime
 
 def create_user(db: Session, username: str, email: str, password: str, first_name: str, last_name: str, gender: bool):
@@ -30,10 +29,6 @@ def authenticate_user(db: Session, username: str, password: str):
     if not verify_password(password, user.hashed_password):
         return False
     return user
-
-from sqlalchemy.orm import Session
-from models.user import BlacklistedToken
-import datetime
 
 def blacklist_token(db: Session, token: str):
     existing_token = db.query(BlacklistedToken).filter(BlacklistedToken.token == token).first()

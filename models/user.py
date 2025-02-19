@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float
 from database.session import Base
 import datetime
 
@@ -14,6 +14,9 @@ class User(Base):
     gender = Column(Boolean, nullable=False)
     is_active = Column(Boolean, default=True)
     role = Column(String, default="user")
+    weight = Column(Float, nullable=True)  # Вес
+    height = Column(Float, nullable=True)  # Рост
+    age = Column(Integer, nullable=True)  # Возраст
 
 class BlacklistedToken(Base):
     __tablename__ = "blacklisted_tokens"
