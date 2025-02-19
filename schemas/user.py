@@ -20,13 +20,34 @@ class UserOut(BaseModel):
     gender: bool
     is_active: bool
     role: str
+    weight: Optional[float] = None
+    height: Optional[float] = None
+    age: Optional[int] = None
+    training_program: Optional[str] = None
+    training_location: Optional[str] = None
+    training_experience: Optional[str] = None
 
     class Config:
         orm_mode = True
 
+class UserUpdate(BaseModel):
+    weight: float
+    height: float
+    age: int
+
 class UserLogin(BaseModel):
     username: str
     password: str
+
+class TrainingProgramUpdate(BaseModel):
+    training_program: str = Field(..., min_length=3, max_length=50)
+
+class TrainingLocationUpdate(BaseModel):
+    training_location: str = Field(..., min_length=3, max_length=20)
+
+class TrainingExperienceUpdate(BaseModel):
+    training_experience: str = Field(..., min_length=3, max_length=20)
+
 
 class Token(BaseModel):
     access_token: str

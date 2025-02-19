@@ -3,7 +3,6 @@ from models.user import User
 from auth.hashing import get_password_hash
 from auth.hashing import verify_password
 from models.user import BlacklistedToken
-from datetime import timedelta
 import datetime
 
 def create_user(db: Session, username: str, email: str, password: str, first_name: str, last_name: str, gender: bool):
@@ -30,10 +29,6 @@ def authenticate_user(db: Session, username: str, password: str):
     if not verify_password(password, user.hashed_password):
         return False
     return user
-
-from sqlalchemy.orm import Session
-from models.user import BlacklistedToken
-import datetime
 
 def blacklist_token(db: Session, token: str):
     existing_token = db.query(BlacklistedToken).filter(BlacklistedToken.token == token).first()
@@ -74,3 +69,18 @@ def verify_reset_code(db: Session, email: str, code: str):
         if stored_code["code"] == code and stored_code["expires_at"] > datetime.datetime.utcnow():
             return True
     return False
+
+def update_training_program(db: Session, user: User, training_program: str):
+    user.training_program = training_program
+    db.commit()
+    db.refresh(user)
+
+def update_training_location(db: Session, user: User, training_location: str):
+    user.training_location = training_location
+    db.commit()
+    db.refresh(user)
+
+def update_training_experience(db: Session, user: User, training_experience: str):
+    user.training_experience = training_experience
+    db.commit()
+    db.refresh(user)
