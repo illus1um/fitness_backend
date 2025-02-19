@@ -14,9 +14,11 @@ class User(Base):
     gender = Column(Boolean, nullable=False)
     is_active = Column(Boolean, default=True)
     role = Column(String, default="user")
-    weight = Column(Float, nullable=True)  # Вес
-    height = Column(Float, nullable=True)  # Рост
-    age = Column(Integer, nullable=True)  # Возраст
+    weight = Column(Float, nullable=True)
+    height = Column(Float, nullable=True)
+    age = Column(Integer, nullable=True)
+    fitness_goal = Column(String, nullable=True)
+
 
 class BlacklistedToken(Base):
     __tablename__ = "blacklisted_tokens"

@@ -4,6 +4,7 @@ from database.session import get_db
 from schemas.user import UserOut, UserUpdate
 from models.user import User
 from auth.dependencies import get_current_user
+from schemas.user import FitnessGoalUpdate
 
 users_router = APIRouter()
 
@@ -41,3 +42,17 @@ def profile_status(current_user: User = Depends(get_current_user)):
         return {"profile_completed": False}  # Нужно заполнить
 
     return {"profile_completed": True}  # Профиль уже заполнен
+
+@users_router.post("/set-goal")
+def set_fitness_goal(goal_data: FitnessGoalUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Сохраняем выбранную цель (фитнес-направление)"""
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    user.fitness_goal = goal_data.fitness_goal
+    db.commit()
+    db.refresh(user)
+
+    return {"message": "Цель обновлена", "fitness_goal": user.fitness_goal}
+

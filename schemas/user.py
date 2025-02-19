@@ -33,6 +33,9 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+class FitnessGoalUpdate(BaseModel):
+    fitness_goal: str = Field(..., min_length=3, max_length=50)
+
 class Token(BaseModel):
     access_token: str
     refresh_token: str
