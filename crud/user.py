@@ -69,3 +69,18 @@ def verify_reset_code(db: Session, email: str, code: str):
         if stored_code["code"] == code and stored_code["expires_at"] > datetime.datetime.utcnow():
             return True
     return False
+
+def update_training_program(db: Session, user: User, training_program: str):
+    user.training_program = training_program
+    db.commit()
+    db.refresh(user)
+
+def update_training_location(db: Session, user: User, training_location: str):
+    user.training_location = training_location
+    db.commit()
+    db.refresh(user)
+
+def update_training_experience(db: Session, user: User, training_experience: str):
+    user.training_experience = training_experience
+    db.commit()
+    db.refresh(user)

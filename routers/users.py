@@ -12,9 +12,13 @@ from schemas.user import TrainingExperienceUpdate
 users_router = APIRouter()
 
 @users_router.get("/me", response_model=UserOut)
-def read_users_me(current_user: User = Depends(get_current_user)):
-    """Получение информации о текущем пользователе"""
-    return current_user
+def read_users_me(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    user = db.query(User).filter(User.id == current_user.id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    return user
 
 @users_router.post("/update-profile")
 def update_profile(
@@ -84,3 +88,30 @@ def set_training_experience(experience_data: TrainingExperienceUpdate, db: Sessi
     db.refresh(user)
 
     return {"message": "Уровень подготовки обновлен", "training_experience": user.training_experience}
+
+@users_router.post("/update-training-program")
+def update_training_program(
+    data: TrainingProgramUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    update_training_program(db, current_user, data.training_program)
+    return {"message": "Тренировочный план успешно обновлен"}
+
+@users_router.post("/update-training-location")
+def update_training_location(
+    data: TrainingLocationUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    update_training_location(db, current_user, data.training_location)
+    return {"message": "Место тренировок успешно обновлено"}
+
+@users_router.post("/update-training-experience")
+def update_training_experience(
+    data: TrainingExperienceUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    update_training_experience(db, current_user, data.training_experience)
+    return {"message": "Уровень подготовки успешно обновлен"}
