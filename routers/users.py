@@ -1,13 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database.session import get_db
-from schemas.user import UserOut, UserProfileUpdate
+from schemas.user import UserOut, UserProfileUpdate, ChangePasswordRequest
 from models.user import User
 from crud.user import delete_user
 from auth.dependencies import get_current_user
 from schemas.user import TrainingProgramUpdate
 from schemas.user import TrainingLocationUpdate
 from schemas.user import TrainingExperienceUpdate
+from crud.user import update_user_password
+from auth.hashing import verify_password
+
   # Добавляем новую схему
 
 users_router = APIRouter()
@@ -142,3 +145,16 @@ def delete_account(
     delete_user(db, current_user)
 
     return {"message": "Аккаунт успешно удален"}
+
+@users_router.post("/change-password")
+def change_password(
+    request: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Смена пароля пользователя"""
+    if not verify_password(request.old_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect old password")
+
+    update_user_password(db, current_user, request.new_password)
+    return {"message": "Password updated successfully"}

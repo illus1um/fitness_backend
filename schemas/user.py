@@ -41,6 +41,9 @@ class UserProfileUpdate(BaseModel):
     training_location: Optional[str] = None
     training_experience: Optional[str] = None
 
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
 class UserLogin(BaseModel):
     username: str
     password: str
