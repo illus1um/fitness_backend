@@ -15,7 +15,14 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 🔹 CORS (разрешаем доступ с фронтенда)
-origins = ["http://localhost", "http://10.0.2.2:8000"]
+origins = [
+    "http://localhost",
+    "http://10.0.2.2:8000",
+    "http://192.168.1.76:8000",  # ✅ Добавляем IP ноутбука
+    "http://192.168.1.76",       # ✅ На случай, если порт не указан
+    "*",  # ✅ (для тестов) Разрешает все источники
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
