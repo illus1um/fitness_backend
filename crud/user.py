@@ -84,3 +84,7 @@ def update_training_experience(db: Session, user: User, training_experience: str
     user.training_experience = training_experience
     db.commit()
     db.refresh(user)
+
+def delete_user(db: Session, user: User):
+    db.delete(user)
+    db.commit()

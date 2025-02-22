@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database.session import get_db
-from schemas.user import UserOut, UserUpdate
+from schemas.user import UserOut, UserProfileUpdate
 from models.user import User
+from crud.user import delete_user
 from auth.dependencies import get_current_user
 from schemas.user import TrainingProgramUpdate
 from schemas.user import TrainingLocationUpdate
 from schemas.user import TrainingExperienceUpdate
-
+  # Добавляем новую схему
 
 users_router = APIRouter()
 
@@ -22,7 +23,7 @@ def read_users_me(db: Session = Depends(get_db), current_user: User = Depends(ge
 
 @users_router.post("/update-profile")
 def update_profile(
-    user_data: UserUpdate,
+    user_data: UserProfileUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -30,12 +31,25 @@ def update_profile(
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
-    if user_data.weight:
+    # Обновляем данные пользователя
+    if user_data.first_name is not None:
+        user.first_name = user_data.first_name
+    if user_data.last_name is not None:
+        user.last_name = user_data.last_name
+    if user_data.gender is not None:
+        user.gender = user_data.gender
+    if user_data.weight is not None:
         user.weight = user_data.weight
-    if user_data.height:
+    if user_data.height is not None:
         user.height = user_data.height
-    if user_data.age:
+    if user_data.age is not None:
         user.age = user_data.age
+    if user_data.training_program is not None:
+        user.training_program = user_data.training_program
+    if user_data.training_location is not None:
+        user.training_location = user_data.training_location
+    if user_data.training_experience is not None:
+        user.training_experience = user_data.training_experience
 
     db.commit()
     db.refresh(user)
@@ -115,3 +129,16 @@ def update_training_experience(
 ):
     update_training_experience(db, current_user, data.training_experience)
     return {"message": "Уровень подготовки успешно обновлен"}
+
+@users_router.delete("/delete-account")
+def delete_account(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Удаление аккаунта текущего пользователя"""
+    if not current_user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    delete_user(db, current_user)
+
+    return {"message": "Аккаунт успешно удален"}
