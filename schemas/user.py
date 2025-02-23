@@ -30,11 +30,20 @@ class UserOut(BaseModel):
     class Config:
         orm_mode = True
 
-class UserUpdate(BaseModel):
-    weight: float
-    height: float
-    age: int
+class UserProfileUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    gender: Optional[bool] = None  # True = Мужской, False = Женский
+    weight: Optional[float] = None
+    height: Optional[float] = None
+    age: Optional[int] = None
+    training_program: Optional[str] = None
+    training_location: Optional[str] = None
+    training_experience: Optional[str] = None
 
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
 class UserLogin(BaseModel):
     username: str
     password: str
