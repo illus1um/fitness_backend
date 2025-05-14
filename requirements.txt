@@ -12,3 +12,4 @@ PyJWT==2.9.0
 email_validator==2.2.0
 redis==5.3.0b5
 fastapi-limiter==0.1.6
+aiosmtplib>=1.1.6
