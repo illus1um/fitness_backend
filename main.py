@@ -6,6 +6,7 @@ import logging
 from routers.auth import auth_router
 from routers.users import users_router
 from routers.password_reset import password_reset_router
+from routers.progress import router as progress_router
 
 # 🔹 Инициализация FastAPI
 app = FastAPI()
@@ -18,9 +19,9 @@ logger = logging.getLogger(__name__)
 origins = [
     "http://localhost",
     "http://10.0.2.2:8000",
-    "http://192.168.1.76:8000",  # ✅ Добавляем IP ноутбука
-    "http://192.168.1.76",       # ✅ На случай, если порт не указан
-    "*",  # ✅ (для тестов) Разрешает все источники
+    "http://192.168.1.76:8000",
+    "http://192.168.1.76",
+    "*",
 ]
 
 app.add_middleware(
@@ -38,3 +39,4 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth_router, prefix="/auth", tags=["Аутентификация"])
 app.include_router(users_router, prefix="/users", tags=["Пользователи"])
 app.include_router(password_reset_router, prefix="/password", tags=["Восстановление пароля"])
+app.include_router(progress_router, prefix="/progress", tags=["Progress"])

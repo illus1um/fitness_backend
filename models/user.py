@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float
+from sqlalchemy.orm import relationship
 from database.session import Base
 import datetime
 
@@ -20,6 +21,7 @@ class User(Base):
     training_program = Column(String, nullable=True)
     training_location = Column(String, nullable=True)
     training_experience = Column(String, nullable=True)
+    progress = relationship("Progress", back_populates="user", cascade="all, delete-orphan")
 
 class BlacklistedToken(Base):
     __tablename__ = "blacklisted_tokens"

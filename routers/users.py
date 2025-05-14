@@ -11,8 +11,6 @@ from schemas.user import TrainingExperienceUpdate
 from crud.user import update_user_password
 from auth.hashing import verify_password
 
-  # Добавляем новую схему
-
 users_router = APIRouter()
 
 @users_router.get("/me", response_model=UserOut)
