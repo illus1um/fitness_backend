@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from auth.jwt import create_access_token, create_refresh_token
 from database.session import get_db
 from schemas.user import Token, RefreshTokenRequest
-from crud.user import authenticate_user, blacklist_token
+from crud.user import authenticate_user, blacklist_token, get_user_by_email
 import logging
 from crud.user import create_user, get_user
 from schemas.user import UserCreate, UserOut
@@ -14,13 +14,34 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 logger = logging.getLogger(__name__)
 
+
 @auth_router.post("/register", response_model=UserOut)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     """Регистрация нового пользователя"""
     if get_user(db, user.username):
         raise HTTPException(status_code=400, detail="Username already registered")
 
+    if get_user_by_email(db, user.email):
+        raise HTTPException(status_code=400, detail="Email already registered")
+
     return create_user(db, user.username, user.email, user.password, user.first_name, user.last_name, user.gender)
+
+
+@auth_router.get("/check-username")
+def check_username(username: str, db: Session = Depends(get_db)):
+    """Проверка, занят ли username"""
+    if get_user(db, username):
+        raise HTTPException(status_code=400, detail="Username already taken")
+    return {"available": True}
+
+
+@auth_router.get("/check-email")
+def check_email(email: str, db: Session = Depends(get_db)):
+    """Проверка, занят ли email"""
+    if get_user_by_email(db, email):
+        raise HTTPException(status_code=400, detail="Email already taken")
+    return {"available": True}
+
 
 @auth_router.post("/token", response_model=Token)
 def login_for_access_token(
@@ -40,6 +61,7 @@ def login_for_access_token(
         "token_type": "bearer"
     }
 
+
 @auth_router.post("/refresh", response_model=Token)
 def refresh_token(refresh_request: RefreshTokenRequest):
     """Обновление токена"""
@@ -48,6 +70,7 @@ def refresh_token(refresh_request: RefreshTokenRequest):
         "refresh_token": create_refresh_token({"sub": "username"}),
         "token_type": "bearer"
     }
+
 
 @auth_router.post("/logout")
 def logout(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
