@@ -8,6 +8,7 @@ from routers.users import users_router
 from routers.password_reset import password_reset_router
 from routers.progress import router as progress_router
 from routers.plan import router as plan_router
+from routers.water import router as water_router
 
 app = FastAPI()
 
@@ -33,8 +34,9 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
-app.include_router(auth_router, prefix="/auth", tags=["Authentification"])
+app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 app.include_router(users_router, prefix="/users", tags=["Users"])
 app.include_router(password_reset_router, prefix="/password", tags=["Reset Password"])
 app.include_router(progress_router, prefix="/progress", tags=["Progress"])
 app.include_router(plan_router, prefix="/plan", tags=["Plan"])
+app.include_router(water_router, prefix="/water", tags=["Water Tracking"])
