@@ -22,6 +22,7 @@ class User(Base):
     training_location = Column(String, nullable=True)
     training_experience = Column(String, nullable=True)
     progress = relationship("Progress", back_populates="user", cascade="all, delete-orphan")
+    plan = relationship("Plan", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
 class BlacklistedToken(Base):
     __tablename__ = "blacklisted_tokens"

@@ -10,8 +10,12 @@ from schemas.user import TrainingLocationUpdate
 from schemas.user import TrainingExperienceUpdate
 from crud.user import update_user_password
 from auth.hashing import verify_password
+from crud.plan import delete_user_plan  # Добавлен импорт для удаления плана
+import logging
 
 users_router = APIRouter()
+logger = logging.getLogger(__name__)
+
 
 @users_router.get("/me", response_model=UserOut)
 def read_users_me(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -22,15 +26,34 @@ def read_users_me(db: Session = Depends(get_db), current_user: User = Depends(ge
 
     return user
 
+
 @users_router.post("/update-profile")
 def update_profile(
-    user_data: UserProfileUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        user_data: UserProfileUpdate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    # Проверяем, меняются ли параметры, влияющие на план тренировок
+    should_reset_plan = False
+
+    if user_data.training_program is not None and user.training_program != user_data.training_program:
+        should_reset_plan = True
+        logger.info(
+            f"User {user.id}: training program changed from '{user.training_program}' to '{user_data.training_program}'")
+
+    if user_data.training_location is not None and user.training_location != user_data.training_location:
+        should_reset_plan = True
+        logger.info(
+            f"User {user.id}: training location changed from '{user.training_location}' to '{user_data.training_location}'")
+
+    if user_data.training_experience is not None and user.training_experience != user_data.training_experience:
+        should_reset_plan = True
+        logger.info(
+            f"User {user.id}: training experience changed from '{user.training_experience}' to '{user_data.training_experience}'")
 
     # Обновляем данные пользователя
     if user_data.first_name is not None:
@@ -52,10 +75,16 @@ def update_profile(
     if user_data.training_experience is not None:
         user.training_experience = user_data.training_experience
 
+    # Если изменились параметры, влияющие на план, сбрасываем план
+    if should_reset_plan:
+        logger.info(f"User {user.id}: resetting workout plan due to profile changes")
+        delete_user_plan(db, current_user.id)
+
     db.commit()
     db.refresh(user)
 
     return {"message": "Профиль успешно обновлен", "user": user}
+
 
 @users_router.get("/profile-status")
 def profile_status(current_user: User = Depends(get_current_user)):
@@ -65,12 +94,21 @@ def profile_status(current_user: User = Depends(get_current_user)):
 
     return {"profile_completed": True}  # Профиль уже заполнен
 
+
 @users_router.post("/set-program")
-def set_training_program(program_data: TrainingProgramUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def set_training_program(program_data: TrainingProgramUpdate, db: Session = Depends(get_db),
+                         current_user: User = Depends(get_current_user)):
     """Сохраняем программу тренировок"""
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    # Если программа тренировок изменилась, очищаем план
+    if user.training_program != program_data.training_program:
+        logger.info(
+            f"User {user.id}: training program changed from '{user.training_program}' to '{program_data.training_program}'")
+        # Очищаем план тренировок, чтобы пользователь создал новый
+        delete_user_plan(db, current_user.id)
 
     user.training_program = program_data.training_program
     db.commit()
@@ -78,12 +116,21 @@ def set_training_program(program_data: TrainingProgramUpdate, db: Session = Depe
 
     return {"message": "Программа тренировок обновлена", "training_program": user.training_program}
 
+
 @users_router.post("/set-location")
-def set_training_location(location_data: TrainingLocationUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def set_training_location(location_data: TrainingLocationUpdate, db: Session = Depends(get_db),
+                          current_user: User = Depends(get_current_user)):
     """Сохраняем место тренировки (Дом / Зал)"""
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    # Если место тренировок изменилось, очищаем план
+    if user.training_location != location_data.training_location:
+        logger.info(
+            f"User {user.id}: training location changed from '{user.training_location}' to '{location_data.training_location}'")
+        # Очищаем план тренировок, чтобы пользователь создал новый
+        delete_user_plan(db, current_user.id)
 
     user.training_location = location_data.training_location
     db.commit()
@@ -91,12 +138,21 @@ def set_training_location(location_data: TrainingLocationUpdate, db: Session = D
 
     return {"message": "Место тренировки обновлено", "training_location": user.training_location}
 
+
 @users_router.post("/set-experience")
-def set_training_experience(experience_data: TrainingExperienceUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def set_training_experience(experience_data: TrainingExperienceUpdate, db: Session = Depends(get_db),
+                            current_user: User = Depends(get_current_user)):
     """Сохраняем уровень подготовки"""
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    # Если уровень опыта изменился, очищаем план
+    if user.training_experience != experience_data.training_experience:
+        logger.info(
+            f"User {user.id}: training experience changed from '{user.training_experience}' to '{experience_data.training_experience}'")
+        # Очищаем план тренировок, чтобы пользователь создал новый
+        delete_user_plan(db, current_user.id)
 
     user.training_experience = experience_data.training_experience
     db.commit()
@@ -104,37 +160,56 @@ def set_training_experience(experience_data: TrainingExperienceUpdate, db: Sessi
 
     return {"message": "Уровень подготовки обновлен", "training_experience": user.training_experience}
 
+
 @users_router.post("/update-training-program")
 def update_training_program(
-    data: TrainingProgramUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        data: TrainingProgramUpdate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
+    # Проверка изменения перед обновлением
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if user and user.training_program != data.training_program:
+        delete_user_plan(db, current_user.id)
+
     update_training_program(db, current_user, data.training_program)
     return {"message": "Тренировочный план успешно обновлен"}
 
+
 @users_router.post("/update-training-location")
 def update_training_location(
-    data: TrainingLocationUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        data: TrainingLocationUpdate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
+    # Проверка изменения перед обновлением
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if user and user.training_location != data.training_location:
+        delete_user_plan(db, current_user.id)
+
     update_training_location(db, current_user, data.training_location)
     return {"message": "Место тренировок успешно обновлено"}
 
+
 @users_router.post("/update-training-experience")
 def update_training_experience(
-    data: TrainingExperienceUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        data: TrainingExperienceUpdate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
+    # Проверка изменения перед обновлением
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if user and user.training_experience != data.training_experience:
+        delete_user_plan(db, current_user.id)
+
     update_training_experience(db, current_user, data.training_experience)
     return {"message": "Уровень подготовки успешно обновлен"}
 
+
 @users_router.delete("/delete-account")
 def delete_account(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
     """Удаление аккаунта текущего пользователя"""
     if not current_user:
@@ -144,11 +219,12 @@ def delete_account(
 
     return {"message": "Аккаунт успешно удален"}
 
+
 @users_router.post("/change-password")
 def change_password(
-    request: ChangePasswordRequest,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+        request: ChangePasswordRequest,
+        db: Session = Depends(get_db),
+        current_user=Depends(get_current_user)
 ):
     """Смена пароля пользователя"""
     if not verify_password(request.old_password, current_user.hashed_password):

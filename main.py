@@ -7,15 +7,14 @@ from routers.auth import auth_router
 from routers.users import users_router
 from routers.password_reset import password_reset_router
 from routers.progress import router as progress_router
+from routers.plan import router as plan_router
 
-# 🔹 Инициализация FastAPI
 app = FastAPI()
 
-# 🔹 Логирование
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 🔹 CORS (разрешаем доступ с фронтенда)
+# CORS
 origins = [
     "http://localhost",
     "http://10.0.2.2:8000",
@@ -32,11 +31,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 🔹 Создание таблиц в базе (если ещё не созданы)
 Base.metadata.create_all(bind=engine)
 
-# 🔹 Подключаем роутеры
-app.include_router(auth_router, prefix="/auth", tags=["Аутентификация"])
-app.include_router(users_router, prefix="/users", tags=["Пользователи"])
-app.include_router(password_reset_router, prefix="/password", tags=["Восстановление пароля"])
+app.include_router(auth_router, prefix="/auth", tags=["Authentification"])
+app.include_router(users_router, prefix="/users", tags=["Users"])
+app.include_router(password_reset_router, prefix="/password", tags=["Reset Password"])
 app.include_router(progress_router, prefix="/progress", tags=["Progress"])
+app.include_router(plan_router, prefix="/plan", tags=["Plan"])
