@@ -25,6 +25,7 @@ class User(Base):
     plan = relationship("Plan", back_populates="user", uselist=False, cascade="all, delete-orphan")
     water_intake = relationship("WaterIntake", back_populates="user", cascade="all, delete-orphan")
     water_intake_records = relationship("WaterIntakeRecord", back_populates="user", cascade="all, delete-orphan")
+    avatar_url = Column(String, nullable=True)
 
 class BlacklistedToken(Base):
     __tablename__ = "blacklisted_tokens"

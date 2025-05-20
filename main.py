@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from database.session import Base, engine
 import logging
+import os
 
 from routers.auth import auth_router
 from routers.users import users_router
@@ -31,6 +33,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Make sure media directory exists
+if not os.path.exists("media"):
+    os.makedirs("media")
+
+# Mount static files directory
+app.mount("/media", StaticFiles(directory="media"), name="media")
 
 Base.metadata.create_all(bind=engine)
 

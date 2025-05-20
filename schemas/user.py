@@ -26,6 +26,7 @@ class UserOut(BaseModel):
     training_program: Optional[str] = None
     training_location: Optional[str] = None
     training_experience: Optional[str] = None
+    avatar_url: Optional[str] = None
 
     class Config:
         from_attributes = True
