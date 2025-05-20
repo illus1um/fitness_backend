@@ -17,8 +17,8 @@ async def forgot_password(email: str = Form(...), db: Session = Depends(get_db))
     reset_code = str(random.randint(100000, 999999))
     save_reset_code(db, email, reset_code)
 
-    email_body = f"Ваш код для сброса пароля: {reset_code}"
-    await send_email(email, "Восстановление пароля", email_body)
+    email_body = f"Your password reset code: {reset_code}"
+    await send_email(email, "Password Recovery", email_body)
 
     return {"message": "Код отправлен"}
 

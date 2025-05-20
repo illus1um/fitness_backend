@@ -38,8 +38,19 @@ app.add_middleware(
 if not os.path.exists("media"):
     os.makedirs("media")
 
+# Make sure static/assets/gifs directory exists
+if not os.path.exists("static/assets/gifs"):
+    os.makedirs("static/assets/gifs")
+
 # Mount static files directory
 app.mount("/media", StaticFiles(directory="media"), name="media")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Базовый маршрут для проверки работоспособности гифок
+@app.get("/assets/gifs/{filename}")
+async def get_gif(filename: str):
+    # FastAPI будет автоматически раздавать файлы из директории static/assets/gifs
+    return {"url": f"/static/assets/gifs/{filename}"}
 
 Base.metadata.create_all(bind=engine)
 
