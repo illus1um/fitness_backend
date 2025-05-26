@@ -40,7 +40,6 @@ def get_daily_water_intake(
     """Get water intake records for a specific date"""
     intake = water_crud.get_daily_water_intake(db, current_user.id, date)
     if not intake:
-        # Return empty response if no data
         return {"date": date, "total_amount": 0.0, "records": []}
 
     records = water_crud.get_daily_water_records(db, current_user.id, date)
@@ -61,18 +60,14 @@ def add_water_intake(
     Add water intake for the current date.
     Optionally include detailed records with timestamps.
     """
-    # Get current date in YYYY-MM-DD format
     today = datetime.now().strftime("%Y-%m-%d")
 
-    # Create or update daily total
     water_intake = WaterIntakeCreate(date=today, amount=request.amount)
     result = water_crud.create_water_intake(db, current_user.id, water_intake)
 
-    # Add detailed records if provided
     if request.records:
         for record in request.records:
             water_crud.add_water_intake_record(db, current_user.id, today, record)
-    # If no records provided, add one record with the total amount
     elif request.amount > 0:
         record = WaterIntakeRecordCreate(
             amount=request.amount,
@@ -114,21 +109,17 @@ def delete_water_record(
         current_user: User = Depends(get_current_user)
 ):
     """Delete a specific water intake record and update the daily total"""
-    # Get the record to be deleted
     record = db.query(WaterIntakeRecord).filter_by(id=record_id, user_id=current_user.id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
 
-    # Keep track of the date and amount
     date = record.date
     amount_to_deduct = record.amount
 
-    # Delete the record
     success = water_crud.delete_water_intake_record(db, record_id, current_user.id)
     if not success:
         raise HTTPException(status_code=404, detail="Record not found")
 
-    # Update the daily total
     daily_intake = water_crud.get_daily_water_intake(db, current_user.id, date)
     if daily_intake:
         new_amount = max(0, daily_intake.amount - amount_to_deduct)
@@ -144,10 +135,8 @@ def delete_day_water_intake(
         current_user: User = Depends(get_current_user)
 ):
     """Delete all water intake records for a specific date"""
-    # First delete all records
     water_crud.delete_day_records(db, current_user.id, date)
 
-    # Then set the daily total to 0
     water_crud.update_water_intake(db, current_user.id, date, 0)
 
     return {"message": f"All water intake data for {date} deleted"}

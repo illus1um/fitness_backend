@@ -13,5 +13,5 @@ class Progress(Base):
     sets_completed = Column(Integer, default=0, nullable=False)
     completed_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
 
-    # связь с пользователем
+    # relationship with user
     user = relationship("User", back_populates="progress")

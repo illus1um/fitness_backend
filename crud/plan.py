@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_user_plan(db: Session, user_id: int) -> Plan:
-    """Получает план тренировок пользователя"""
+    """Gets the user's training plan"""
     try:
         plan = db.query(Plan).filter(Plan.user_id == user_id).first()
         if plan:
@@ -22,11 +22,11 @@ def get_user_plan(db: Session, user_id: int) -> Plan:
 
 
 def save_plan(db: Session, user_id: int, plan: PlanCreate) -> Plan:
-    """Сохраняет или обновляет план тренировок пользователя"""
+    """Saves or updates the user's training plan"""
     try:
         db_plan = get_user_plan(db, user_id)
 
-        # Сохраняем дни и упражнения как есть без преобразования
+        # Save days and exercises as is without transformation
         days_data = [day.dict(exclude_unset=True) for day in plan.days]
 
         if db_plan:
@@ -54,7 +54,7 @@ def save_plan(db: Session, user_id: int, plan: PlanCreate) -> Plan:
 
 
 def delete_user_plan(db: Session, user_id: int) -> None:
-    """Удаляет план тренировок пользователя"""
+    """Deletes the user's training plan"""
     try:
         db.query(Plan).filter(Plan.user_id == user_id).delete()
         db.commit()

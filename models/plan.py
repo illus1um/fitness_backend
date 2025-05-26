@@ -16,8 +16,8 @@ class Plan(Base):
     user = relationship("User", back_populates="plan")
 
     def to_dict(self):
-        """Конвертирует объект в словарь для API"""
+        """Converts the object to a dictionary for API"""
         return {
             "start_date": self.start_date.isoformat(),
-            "days": self.days  # Возвращаем как есть, так как уже в правильном формате
+            "days": self.days  # Return as is since it's already in the correct format
         }

@@ -37,6 +37,6 @@ def clear_user_progress(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """Удаляет весь прогресс тренировок текущего пользователя."""
+    """Deletes the entire training progress of the current user."""
     delete_all_user_progress(db, current_user.id)
     return {"status": "success", "message": "All progress has been deleted"}

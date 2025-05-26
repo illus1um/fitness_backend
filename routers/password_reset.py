@@ -9,10 +9,10 @@ password_reset_router = APIRouter()
 
 @password_reset_router.post("/forgot")
 async def forgot_password(email: str = Form(...), db: Session = Depends(get_db)):
-    """Запрос на сброс пароля (отправка кода на email)"""
+    """Password reset request (sending code by email)"""
     user = get_user_by_email(db, email)
     if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        raise HTTPException(status_code=404, detail="The user was not found")
 
     reset_code = str(random.randint(100000, 999999))
     save_reset_code(db, email, reset_code)
@@ -20,20 +20,20 @@ async def forgot_password(email: str = Form(...), db: Session = Depends(get_db))
     email_body = f"Your password reset code: {reset_code}"
     await send_email(email, "Password Recovery", email_body)
 
-    return {"message": "Код отправлен"}
+    return {"message": "The code has been sent"}
 
 @password_reset_router.post("/verify")
 def verify_reset(email: str = Form(...), code: str = Form(...), db: Session = Depends(get_db)):
-    """Проверка кода сброса пароля"""
+    """Checking the password reset code"""
     if verify_reset_code(db, email, code):
-        return {"message": "Код подтвержден"}
-    raise HTTPException(status_code=400, detail="Неверный код")
+        return {"message": "The code is confirmed"}
+    raise HTTPException(status_code=400, detail="Invalid code")
 
 @password_reset_router.post("/reset")
 def reset_password(email: str = Form(...), code: str = Form(...), new_password: str = Form(...), db: Session = Depends(get_db)):
-    """Сброс пароля"""
+    """Password Reset"""
     if not verify_reset_code(db, email, code):
-        raise HTTPException(status_code=400, detail="Неверный код")
+        raise HTTPException(status_code=400, detail="Invalid code")
 
     update_user_password(db, get_user_by_email(db, email), new_password)
-    return {"message": "Пароль изменен"}
+    return {"message": "The password has been changed"}

@@ -8,7 +8,7 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=6, max_length=32)
     first_name: str = Field(..., min_length=1, max_length=30)
     last_name: str = Field(..., min_length=1, max_length=30)
-    gender: bool  # True = Мужской, False = Женский
+    gender: bool
 
 
 class UserOut(BaseModel):
@@ -34,7 +34,7 @@ class UserOut(BaseModel):
 class UserProfileUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    gender: Optional[bool] = None  # True = Мужской, False = Женский
+    gender: Optional[bool] = None
     weight: Optional[float] = None
     height: Optional[float] = None
     age: Optional[int] = None

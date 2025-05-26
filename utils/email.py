@@ -3,6 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from config import SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, EMAIL_FROM
 
+
 async def send_email(to_email: str, subject: str, body: str):
     msg = MIMEMultipart()
     msg["From"] = EMAIL_FROM
@@ -22,5 +23,5 @@ async def send_email(to_email: str, subject: str, body: str):
         )
         return True
     except Exception as e:
-        print(f"Ошибка отправки email: {e}")
+        print(f"Error sending email: {e}")
         return False

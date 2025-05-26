@@ -19,7 +19,7 @@ def read_plan(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Получает план тренировок текущего пользователя"""
+    """Gets the current user's workout plan"""
     try:
         plan = get_user_plan(db, current_user.id)
         if not plan:
@@ -43,14 +43,12 @@ async def create_or_update_plan(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Создает или обновляет план тренировок"""
+    """Creates or updates a training plan"""
     try:
-        # Логируем сырые данные запроса
         body = await request.body()
         raw_data = body.decode()
         logger.info(f"Raw request body: {raw_data}")
 
-        # Пробуем распарсить JSON
         try:
             json_data = json.loads(raw_data)
             logger.info(f"Parsed JSON data: {json.dumps(json_data, indent=2)}")
@@ -61,7 +59,6 @@ async def create_or_update_plan(
                 content={"message": "Invalid JSON format", "error": str(e)}
             )
 
-        # Пробуем создать объект PlanCreate
         try:
             plan = PlanCreate(**json_data)
             logger.info(f"Created plan object successfully")
@@ -72,7 +69,6 @@ async def create_or_update_plan(
                 content={"message": "Invalid plan data", "error": str(e)}
             )
 
-        # Сохраняем план
         try:
             result = save_plan(db, current_user.id, plan)
             logger.info(f"Plan saved successfully for user {current_user.id}")
@@ -97,7 +93,7 @@ def delete_plan(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Удаляет план тренировок пользователя"""
+    """Deletes the user's training plan"""
     try:
         delete_user_plan(db, current_user.id)
         logger.info(f"Plan deleted successfully for user {current_user.id}")
@@ -108,47 +104,3 @@ def delete_plan(
             status_code=500,
             detail=f"Error deleting plan: {str(e)}"
         )
-
-
-@router.post("/test")
-async def test_plan_data(
-        request: Request,
-):
-    """Тестовый эндпоинт для проверки данных"""
-    try:
-        # Логируем сырые данные запроса
-        body = await request.body()
-        raw_data = body.decode()
-        logger.info(f"Raw request body: {raw_data}")
-
-        # Пробуем распарсить JSON
-        try:
-            json_data = json.loads(raw_data)
-            logger.info(f"Parsed JSON data: {json.dumps(json_data, indent=2)}")
-
-            # Проверяем структуру данных
-            if 'days' in json_data:
-                first_day = json_data['days'][0]
-                logger.info(f"First day: {json.dumps(first_day, indent=2)}")
-
-                if 'exercises' in first_day:
-                    first_exercise = first_day['exercises'][0]
-                    logger.info(f"First exercise: {json.dumps(first_exercise, indent=2)}")
-
-            return {
-                "message": "Test endpoint successful",
-                "data_received": json_data
-            }
-
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON decode error: {str(e)}")
-            return {
-                "error": "Invalid JSON format",
-                "details": str(e)
-            }
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        return {
-            "error": "Unexpected error",
-            "details": str(e)
-        }

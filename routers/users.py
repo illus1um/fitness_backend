@@ -17,7 +17,6 @@ import uuid
 import io
 from PIL import Image
 from fastapi import UploadFile, File
-from fastapi.staticfiles import StaticFiles
 
 users_router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -31,7 +30,7 @@ def read_users_me(db: Session = Depends(get_db), current_user: User = Depends(ge
     user = db.query(User).filter(User.id == current_user.id).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        raise HTTPException(status_code=404, detail="The user was not found")
 
     return user
 
@@ -44,9 +43,8 @@ def update_profile(
 ):
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        raise HTTPException(status_code=404, detail="The user was not found")
 
-    # Проверяем, меняются ли параметры, влияющие на план тренировок
     should_reset_plan = False
 
     if user_data.training_program is not None and user.training_program != user_data.training_program:
@@ -64,7 +62,6 @@ def update_profile(
         logger.info(
             f"User {user.id}: training experience changed from '{user.training_experience}' to '{user_data.training_experience}'")
 
-    # Обновляем данные пользователя
     if user_data.first_name is not None:
         user.first_name = user_data.first_name
     if user_data.last_name is not None:
@@ -84,7 +81,6 @@ def update_profile(
     if user_data.training_experience is not None:
         user.training_experience = user_data.training_experience
 
-    # Если изменились параметры, влияющие на план, сбрасываем план
     if should_reset_plan:
         logger.info(f"User {user.id}: resetting workout plan due to profile changes")
         delete_user_plan(db, current_user.id)
@@ -92,82 +88,76 @@ def update_profile(
     db.commit()
     db.refresh(user)
 
-    return {"message": "Профиль успешно обновлен", "user": user}
+    return {"message": "Profile has been successfully updated", "user": user}
 
 
 @users_router.get("/profile-status")
 def profile_status(current_user: User = Depends(get_current_user)):
-    """Проверяет, нужно ли заполнять профиль"""
+    """Checks whether the profile needs to be filled out."""
     if current_user.weight is None or current_user.height is None or current_user.age is None:
-        return {"profile_completed": False}  # Нужно заполнить
+        return {"profile_completed": False}
 
-    return {"profile_completed": True}  # Профиль уже заполнен
+    return {"profile_completed": True}
 
 
 @users_router.post("/set-program")
 def set_training_program(program_data: TrainingProgramUpdate, db: Session = Depends(get_db),
                          current_user: User = Depends(get_current_user)):
-    """Сохраняем программу тренировок"""
+    """Saving the training program"""
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
-    # Если программа тренировок изменилась, очищаем план
     if user.training_program != program_data.training_program:
         logger.info(
             f"User {user.id}: training program changed from '{user.training_program}' to '{program_data.training_program}'")
-        # Очищаем план тренировок, чтобы пользователь создал новый
         delete_user_plan(db, current_user.id)
 
     user.training_program = program_data.training_program
     db.commit()
     db.refresh(user)
 
-    return {"message": "Программа тренировок обновлена", "training_program": user.training_program}
+    return {"message": "The training program has been updated", "training_program": user.training_program}
 
 
 @users_router.post("/set-location")
 def set_training_location(location_data: TrainingLocationUpdate, db: Session = Depends(get_db),
                           current_user: User = Depends(get_current_user)):
-    """Сохраняем место тренировки (Дом / Зал)"""
+    """Saving the training place (Home / Gym)"""
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        raise HTTPException(status_code=404, detail="The user was not found")
 
-    # Если место тренировок изменилось, очищаем план
     if user.training_location != location_data.training_location:
         logger.info(
             f"User {user.id}: training location changed from '{user.training_location}' to '{location_data.training_location}'")
-        # Очищаем план тренировок, чтобы пользователь создал новый
         delete_user_plan(db, current_user.id)
 
     user.training_location = location_data.training_location
     db.commit()
     db.refresh(user)
 
-    return {"message": "Место тренировки обновлено", "training_location": user.training_location}
+    return {"message": "The training location has been updated", "training_location": user.training_location}
 
 
 @users_router.post("/set-experience")
 def set_training_experience(experience_data: TrainingExperienceUpdate, db: Session = Depends(get_db),
                             current_user: User = Depends(get_current_user)):
-    """Сохраняем уровень подготовки"""
+    """Saving training experience"""
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        raise HTTPException(status_code=404, detail="The user was not found")
 
-    # Если уровень опыта изменился, очищаем план
     if user.training_experience != experience_data.training_experience:
         logger.info(
             f"User {user.id}: training experience changed from '{user.training_experience}' to '{experience_data.training_experience}'")
-        # Очищаем план тренировок, чтобы пользователь создал новый
         delete_user_plan(db, current_user.id)
 
     user.training_experience = experience_data.training_experience
     db.commit()
     db.refresh(user)
 
-    return {"message": "Уровень подготовки обновлен", "training_experience": user.training_experience}
+    return {"message": "The training level has been updated", "training_experience": user.training_experience}
 
 
 @users_router.post("/update-training-program")
@@ -176,13 +166,12 @@ def update_training_program(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    # Проверка изменения перед обновлением
     user = db.query(User).filter(User.id == current_user.id).first()
     if user and user.training_program != data.training_program:
         delete_user_plan(db, current_user.id)
 
     update_training_program(db, current_user, data.training_program)
-    return {"message": "Тренировочный план успешно обновлен"}
+    return {"message": "The training plan has been successfully updated"}
 
 
 @users_router.post("/update-training-location")
@@ -191,13 +180,12 @@ def update_training_location(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    # Проверка изменения перед обновлением
     user = db.query(User).filter(User.id == current_user.id).first()
     if user and user.training_location != data.training_location:
         delete_user_plan(db, current_user.id)
 
     update_training_location(db, current_user, data.training_location)
-    return {"message": "Место тренировок успешно обновлено"}
+    return {"message": "The training location has been successfully updated"}
 
 
 @users_router.post("/update-training-experience")
@@ -206,13 +194,12 @@ def update_training_experience(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    # Проверка изменения перед обновлением
     user = db.query(User).filter(User.id == current_user.id).first()
     if user and user.training_experience != data.training_experience:
         delete_user_plan(db, current_user.id)
 
     update_training_experience(db, current_user, data.training_experience)
-    return {"message": "Уровень подготовки успешно обновлен"}
+    return {"message": "The training level has been successfully updated"}
 
 
 @users_router.delete("/delete-account")
@@ -220,11 +207,10 @@ def delete_account(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Удаление аккаунта текущего пользователя"""
+    """Deleting the current user's account"""
     if not current_user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        raise HTTPException(status_code=404, detail="The user was not found")
 
-    # Удаляем аватар, если он есть
     if current_user.avatar_url:
         file_path = os.path.join(".", current_user.avatar_url.lstrip("/"))
         if os.path.exists(file_path):
@@ -232,7 +218,7 @@ def delete_account(
 
     delete_user(db, current_user)
 
-    return {"message": "Аккаунт успешно удален"}
+    return {"message": "Account successfully deleted"}
 
 
 @users_router.post("/change-password")
@@ -241,7 +227,7 @@ def change_password(
         db: Session = Depends(get_db),
         current_user=Depends(get_current_user)
 ):
-    """Смена пароля пользователя"""
+    """Changes the user's password"""
     if not verify_password(request.old_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect old password")
 
@@ -255,52 +241,40 @@ async def upload_avatar(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Загружает аватар пользователя"""
+    """Uploads the user's avatar"""
 
-    # Проверка формата файла
     allowed_formats = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
     if avatar.content_type not in allowed_formats:
         raise HTTPException(status_code=400, detail="Only JPEG, PNG and WebP images are allowed")
 
-    # Генерация уникального имени файла
     file_extension = avatar.filename.split(".")[-1]
     unique_filename = f"{uuid.uuid4()}.{file_extension}"
     file_path = os.path.join(AVATAR_DIR, unique_filename)
 
-    # Чтение файла
     contents = await avatar.read()
     
-    # Оптимизация изображения перед сохранением
     try:
-        # Открываем изображение
         img = Image.open(io.BytesIO(contents))
         
-        # Изменяем размер, если изображение слишком большое
         max_size = (800, 800)
         if img.width > max_size[0] or img.height > max_size[1]:
             img.thumbnail(max_size, Image.LANCZOS)
         
-        # Сохраняем оптимизированное изображение
         img.save(file_path, optimize=True, quality=85)
     except Exception as e:
-        # Если что-то пошло не так, сохраняем оригинальный файл
         logger.error(f"Error optimizing avatar for user {current_user.id}: {str(e)}")
         with open(file_path, "wb") as f:
             f.write(contents)
 
-    # Формирование URL для доступа к файлу
     avatar_url = f"/media/avatars/{unique_filename}"
 
-    # Обновление записи в базе данных
     user = db.query(User).filter(User.id == current_user.id).first()
 
-    # Удаление старого файла, если он был
     if user.avatar_url:
         old_avatar_path = os.path.join(".", user.avatar_url.lstrip("/"))
         if os.path.exists(old_avatar_path):
             os.remove(old_avatar_path)
 
-    # Обновление URL аватара
     user.avatar_url = avatar_url
     db.commit()
 
@@ -312,16 +286,14 @@ async def delete_avatar(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Удаляет аватар пользователя"""
+    """Deletes the user's avatar"""
     user = db.query(User).filter(User.id == current_user.id).first()
     
     if user.avatar_url:
-        # Удаление файла
         file_path = os.path.join(".", user.avatar_url.lstrip("/"))
         if os.path.exists(file_path):
             os.remove(file_path)
         
-        # Обнуление URL
         user.avatar_url = None
         db.commit()
         return {"message": "Avatar removed"}

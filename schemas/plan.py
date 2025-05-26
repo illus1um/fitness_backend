@@ -10,12 +10,11 @@ class Exercise(BaseModel):
     id: str
     name: str
     sets: int
-    reps: Any  # Может быть как строкой, так и числом
+    reps: Any
     rest: Optional[str] = None
-    restSec: Optional[int] = None  # Добавляем поле из фронтенда
+    restSec: Optional[int] = None
     notes: Optional[str] = None
 
-    # Добавляем все остальные поля как опциональные
     bodyPart: Optional[str] = None
     equipment: Optional[str] = None
     gifUrl: Optional[str] = None
@@ -28,7 +27,7 @@ class Exercise(BaseModel):
     durationSec: Optional[int] = None
 
     class Config:
-        extra = "allow"  # Разрешаем дополнительные поля
+        extra = "allow"
         allow_population_by_field_name = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
@@ -41,7 +40,7 @@ class DayInfo(BaseModel):
     exercises: List[Exercise]
 
     class Config:
-        extra = "allow"  # Разрешаем дополнительные поля
+        extra = "allow"
         allow_population_by_field_name = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
@@ -53,7 +52,7 @@ class PlanCreate(BaseModel):
     days: List[DayInfo]
 
     class Config:
-        extra = "allow"  # Разрешаем дополнительные поля
+        extra = "allow"
         allow_population_by_field_name = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
@@ -66,7 +65,7 @@ class PlanOut(BaseModel):
 
     class Config:
         orm_mode = True
-        extra = "allow"  # Разрешаем дополнительные поля
+        extra = "allow"
         allow_population_by_field_name = True
         json_encoders = {
             datetime: lambda v: v.isoformat()

@@ -47,11 +47,11 @@ def upsert_progress(db: Session, user_id: int, entry: ProgressCreate):
 
 def delete_all_user_progress(db: Session, user_id: int):
     """
-    Удаляет весь прогресс тренировок для указанного пользователя.
+    Deletes all training progress for the specified user.
 
     Args:
-        db: Сессия базы данных
-        user_id: ID пользователя
+        db: Database session
+        user_id: User ID
     """
     db.query(Progress).filter(Progress.user_id == user_id).delete()
     db.commit()

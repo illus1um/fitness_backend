@@ -1,10 +1,8 @@
 import os
 from dotenv import load_dotenv
 
-# Загружаем переменные из .env
 load_dotenv()
 
-# Получаем данные из .env
 DATABASE_URL = os.getenv("DATABASE_URL")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
@@ -19,6 +17,5 @@ SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 EMAIL_FROM = os.getenv("EMAIL_FROM")
 RESET_PASSWORD_URL = os.getenv("RESET_PASSWORD_URL")
 
-# Проверяем, загружены ли ключевые переменные (чтобы избежать ошибок)
 if not all([DATABASE_URL, SECRET_KEY]):
-    raise ValueError("Не удалось загрузить переменные окружения. Проверь .env файл.")
+    raise ValueError("Failed to load environment variables. Check the .env file.")
