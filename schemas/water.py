@@ -14,7 +14,7 @@ class WaterIntakeRecord(BaseModel):
     timestamp: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class WaterIntakeBase(BaseModel):
@@ -31,7 +31,7 @@ class WaterIntake(WaterIntakeBase):
     timestamp: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class DailyWaterIntakeResponse(BaseModel):
@@ -40,14 +40,14 @@ class DailyWaterIntakeResponse(BaseModel):
     records: List[WaterIntakeRecord]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class WaterIntakeHistoryResponse(BaseModel):
     history: List[WaterIntakeBase]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class WaterIntakeRequest(BaseModel):

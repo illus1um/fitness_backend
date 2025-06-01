@@ -28,7 +28,7 @@ class Exercise(BaseModel):
 
     class Config:
         extra = "allow"
-        allow_population_by_field_name = True
+        validate_by_name = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
@@ -41,7 +41,7 @@ class DayInfo(BaseModel):
 
     class Config:
         extra = "allow"
-        allow_population_by_field_name = True
+        validate_by_name = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
@@ -53,7 +53,7 @@ class PlanCreate(BaseModel):
 
     class Config:
         extra = "allow"
-        allow_population_by_field_name = True
+        validate_by_name = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
@@ -64,9 +64,9 @@ class PlanOut(BaseModel):
     days: List[DayInfo]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         extra = "allow"
-        allow_population_by_field_name = True
+        validate_by_name = True
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
