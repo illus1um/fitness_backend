@@ -13,9 +13,10 @@ from schemas.water import (
     WaterIntakeRequest,
     WaterIntakeHistoryResponse,
     DailyWaterIntakeResponse,
-    WaterIntakeRecord,
+    WaterIntakeRecord as WaterIntakeRecordSchema,
     WaterIntakeRecordCreate
 )
+from models.water import WaterIntakeRecord
 
 router = APIRouter(tags=["Water Tracking"])
 
@@ -42,11 +43,14 @@ def get_daily_water_intake(
     if not intake:
         return {"date": date, "total_amount": 0.0, "records": []}
 
+    # Get records and sort them by timestamp
     records = water_crud.get_daily_water_records(db, current_user.id, date)
+    sorted_records = sorted(records, key=lambda x: x.timestamp)  # Sort by timestamp
+
     return {
         "date": date,
         "total_amount": intake.amount,
-        "records": records
+        "records": sorted_records
     }
 
 
@@ -78,7 +82,7 @@ def add_water_intake(
     return result
 
 
-@router.post("/records", response_model=WaterIntakeRecord)
+@router.post("/records", response_model=WaterIntakeRecordSchema)
 def add_water_record(
         record: WaterIntakeRecordCreate,
         db: Session = Depends(get_db),

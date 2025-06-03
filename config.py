@@ -16,7 +16,6 @@ SMTP_USERNAME = os.getenv("SMTP_USERNAME")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 EMAIL_FROM = os.getenv("EMAIL_FROM")
 RESET_PASSWORD_URL = os.getenv("RESET_PASSWORD_URL")
-print("SMTP_USERNAME:", SMTP_USERNAME)
-print("SMTP_PASSWORD:", SMTP_PASSWORD)
+
 if not all([DATABASE_URL, SECRET_KEY]):
     raise ValueError("Failed to load environment variables. Check the .env file.")
