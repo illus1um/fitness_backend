@@ -43,7 +43,7 @@ async def create_or_update_plan(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Creates or updates a training plan"""
+    """Creates or updates a training plan """
     try:
         body = await request.body()
         raw_data = body.decode()
