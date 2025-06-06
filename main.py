@@ -11,6 +11,8 @@ from routers.password_reset import password_reset_router
 from routers.progress import router as progress_router
 from routers.plan import router as plan_router
 from routers.water import router as water_router
+from routers.email_verification import router as email_verification_router
+
 
 app = FastAPI()
 
@@ -52,3 +54,4 @@ app.include_router(password_reset_router, prefix="/password", tags=["Reset Passw
 app.include_router(progress_router, prefix="/progress", tags=["Progress"])
 app.include_router(plan_router, prefix="/plan", tags=["Plan"])
 app.include_router(water_router, prefix="/water", tags=["Water Tracking"])
+app.include_router(email_verification_router, prefix="/auth", tags=["Email Verification"])

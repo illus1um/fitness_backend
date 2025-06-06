@@ -93,7 +93,6 @@ def update_profile(
 
 @users_router.get("/profile-status")
 def profile_status(current_user: User = Depends(get_current_user)):
-    """Checks whether the profile needs to be filled out."""
     if current_user.weight is None or current_user.height is None or current_user.age is None:
         return {"profile_completed": False}
 
@@ -103,7 +102,6 @@ def profile_status(current_user: User = Depends(get_current_user)):
 @users_router.post("/set-program")
 def set_training_program(program_data: TrainingProgramUpdate, db: Session = Depends(get_db),
                          current_user: User = Depends(get_current_user)):
-    """Saving the training program"""
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -123,7 +121,6 @@ def set_training_program(program_data: TrainingProgramUpdate, db: Session = Depe
 @users_router.post("/set-location")
 def set_training_location(location_data: TrainingLocationUpdate, db: Session = Depends(get_db),
                           current_user: User = Depends(get_current_user)):
-    """Saving the training place (Home / Gym)"""
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=404, detail="The user was not found")
@@ -143,7 +140,6 @@ def set_training_location(location_data: TrainingLocationUpdate, db: Session = D
 @users_router.post("/set-experience")
 def set_training_experience(experience_data: TrainingExperienceUpdate, db: Session = Depends(get_db),
                             current_user: User = Depends(get_current_user)):
-    """Saving training experience"""
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=404, detail="The user was not found")
@@ -207,7 +203,6 @@ def delete_account(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Deleting the current user's account"""
     if not current_user:
         raise HTTPException(status_code=404, detail="The user was not found")
 
@@ -227,7 +222,6 @@ def change_password(
         db: Session = Depends(get_db),
         current_user=Depends(get_current_user)
 ):
-    """Changes the user's password"""
     if not verify_password(request.old_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect old password")
 
@@ -241,7 +235,6 @@ async def upload_avatar(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Uploads the user's avatar"""
 
     allowed_formats = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
     if avatar.content_type not in allowed_formats:
@@ -286,7 +279,6 @@ async def delete_avatar(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Deletes the user's avatar"""
     user = db.query(User).filter(User.id == current_user.id).first()
     
     if user.avatar_url:

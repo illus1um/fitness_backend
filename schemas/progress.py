@@ -8,7 +8,7 @@ class ProgressEntry(BaseModel):
     completed_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ProgressCreate(BaseModel):
     day_index: int

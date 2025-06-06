@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 @auth_router.post("/register", response_model=UserOut)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    """Registering a new user"""
     if get_user(db, user.username):
         raise HTTPException(status_code=400, detail="Username already registered")
 
@@ -29,7 +28,6 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 @auth_router.get("/check-username")
 def check_username(username: str, db: Session = Depends(get_db)):
-    """Checking if the username is busy"""
     if get_user(db, username):
         raise HTTPException(status_code=400, detail="Username already taken")
     return {"available": True}
@@ -37,7 +35,6 @@ def check_username(username: str, db: Session = Depends(get_db)):
 
 @auth_router.get("/check-email")
 def check_email(email: str, db: Session = Depends(get_db)):
-    """Checking if the email is already taken"""
     if get_user_by_email(db, email):
         raise HTTPException(status_code=400, detail="Email already taken")
     return {"available": True}
@@ -48,7 +45,6 @@ def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    """Login to the system and issue token"""
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         logger.warning(f"Failed login attempt: {form_data.username}")
@@ -64,7 +60,6 @@ def login_for_access_token(
 
 @auth_router.post("/refresh", response_model=Token)
 def refresh_token(refresh_request: RefreshTokenRequest):
-    """Token refresh"""
     return {
         "access_token": create_access_token({"sub": "username"}),
         "refresh_token": create_refresh_token({"sub": "username"}),
@@ -74,7 +69,6 @@ def refresh_token(refresh_request: RefreshTokenRequest):
 
 @auth_router.post("/logout")
 def logout(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    """Logout from the system (token blacklisting)"""
     blacklist_token(db, token)
     logger.info(f"Token blacklisted: {token[:10]}...")
     return {"message": "You have been logged out"}
