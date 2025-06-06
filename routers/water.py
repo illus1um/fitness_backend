@@ -27,7 +27,6 @@ def get_water_history(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Get water intake history for the current user"""
     history = water_crud.get_water_intake_history(db, current_user.id, limit)
     return history
 
@@ -38,7 +37,6 @@ def get_daily_water_intake(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Get water intake records for a specific date"""
     intake = water_crud.get_daily_water_intake(db, current_user.id, date)
     if not intake:
         return {"date": date, "total_amount": 0.0, "records": []}
@@ -60,10 +58,7 @@ def add_water_intake(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """
-    Add water intake for the current date.
-    Optionally include detailed records with timestamps.
-    """
+
     today = datetime.now().strftime("%Y-%m-%d")
 
     water_intake = WaterIntakeCreate(date=today, amount=request.amount)
@@ -88,7 +83,6 @@ def add_water_record(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Add a single water intake record for the current date"""
     today = datetime.now().strftime("%Y-%m-%d")
 
     # Add the record
@@ -112,7 +106,6 @@ def delete_water_record(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Delete a specific water intake record and update the daily total"""
     record = db.query(WaterIntakeRecord).filter_by(id=record_id, user_id=current_user.id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
@@ -138,7 +131,6 @@ def delete_day_water_intake(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Delete all water intake records for a specific date"""
     water_crud.delete_day_records(db, current_user.id, date)
 
     water_crud.update_water_intake(db, current_user.id, date, 0)
@@ -151,6 +143,5 @@ def delete_all_water_data(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Delete all water intake data for the current user"""
     water_crud.delete_all_water_data(db, current_user.id)
     return {"message": "All water intake data deleted"}

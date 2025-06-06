@@ -7,8 +7,6 @@ import crud.email_verification as crud
 from schemas.email_verification import EmailRequest, CodeVerifyRequest
 from utils.email import send_email
 
-# Допустим, ты позже добавишь отправку email
-
 router = APIRouter()
 
 
@@ -17,11 +15,9 @@ async def send_email_verification(req: EmailRequest, db: Session = Depends(get_d
     code = str(random.randint(100000, 999999))
     crud.create_code(db, email=req.email, code=code)
 
-    # Составляем тело письма
     subject = "Your Verification Code"
     body = f"Your verification code is: {code}"
 
-    # Отправляем письмо
     success = await send_email(to_email=req.email, subject=subject, body=body)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to send verification email")
